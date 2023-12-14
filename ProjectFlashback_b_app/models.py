@@ -1,4 +1,4 @@
-from abc import abstractclassmethod
+from operator import truediv
 from django.db import models
 
 entryTypeChoices = [
@@ -20,6 +20,7 @@ class Dataset(models.Model):
     name = models.CharField(max_length=100)
 
 class BasicDataEntry(models.Model):
+    entryId = models.AutoField(primary_key=True, editable=False)
     dataset = models.ForeignKey(Dataset, on_delete=models.SET_NULL, 
                                 null=True, default=None)
     #the exact date of the entry, the date the entry was created in the original source
@@ -29,11 +30,12 @@ class BasicDataEntry(models.Model):
     #1991 but the date is whenever were created on KYM such as 2008)
     year = models.IntegerField()
     #link to the entry
-    url = models.URLField(primary_key=True)
+    url = models.URLField(unique=True)
     #todo: what if the string is longer?
     title = models.CharField(max_length=250)
     entryType = models.CharField(max_length=2, choices=entryTypeChoices)
-    
+    scoreValue = models.DecimalField(max_digits=6, decimal_places=2)
+
     class Meta:
         abstract = True
         db_table = "BasicDataEntry"
@@ -44,26 +46,17 @@ class BasicDataEntry(models.Model):
     
 class RedditDataEntry(BasicDataEntry):
     img = models.URLField()
-    upvotes = models.IntegerField()
-    comments = models.IntegerField()
-
     class Meta:
         db_table = "RedditDataEntry"
 
 class KymDataEntry(BasicDataEntry):
     img = models.URLField()
-    fav = models.IntegerField()
-    views = models.IntegerField()
-
     class Meta:
         db_table = "KymDataEntry"
         
 class TwitterDataEntry(BasicDataEntry):
     lang = models.CharField(max_length=2)
-    retweetsCount = models.IntegerField()
-    likesCount = models.IntegerField()
     source = models.CharField(max_length=3)
-    
     class Meta:
         db_table = "TwitterDataEntry"
         
@@ -77,4 +70,4 @@ class CookieUser(models.Model):
 #this acts as a record to what entries have been read by a user
 #note that we should be using ManyToMany relation with the BasicDataEntry but can't since it is abstract
 class UserEntryRead(models.Model):
-    entryUrl = models.URLField()
+    entryId = models.IntegerField(primary_key=True)
