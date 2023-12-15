@@ -39,6 +39,7 @@
     <Compile Include="ProjectFlashback_b_app\apps.py" />
     <Compile Include="ProjectFlashback_b_app\migrations\__init__.py" />
     <Compile Include="ProjectFlashback_b_app\models.py" />
+    <Compile Include="ProjectFlashback_b_app\serializer.py" />
     <Compile Include="ProjectFlashback_b_app\tests.py" />
     <Compile Include="ProjectFlashback_b_app\urls.py" />
     <Compile Include="ProjectFlashback_b_app\views.py" />

@@ -1,4 +1,3 @@
-from operator import truediv
 from django.db import models
 
 entryTypeChoices = [
@@ -40,10 +39,12 @@ class BasicDataEntry(models.Model):
         abstract = True
         db_table = "BasicDataEntry"
         
-    def __str__(self):
-        return self.entryType + " " + self.title
-        
-    
+    def __str__(self) -> str:
+        return self.entryType + " " + self.title[:50]
+
+#count entries count per year            
+#[print(str(i)+' : '+ str(md.RedditDataEntry.objects.filter(year=i).count())) for i in range(1990, 2025, 1)]
+
 class RedditDataEntry(BasicDataEntry):
     img = models.URLField()
     class Meta:
@@ -71,3 +72,6 @@ class CookieUser(models.Model):
 #note that we should be using ManyToMany relation with the BasicDataEntry but can't since it is abstract
 class UserEntryRead(models.Model):
     entryId = models.IntegerField(primary_key=True)
+    
+    def __str__(self) -> str:
+        return str(self.entryId)
