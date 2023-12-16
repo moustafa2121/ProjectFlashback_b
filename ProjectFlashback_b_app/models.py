@@ -72,6 +72,5 @@ class CookieUser(models.Model):
 #note that we should be using ManyToMany relation with the BasicDataEntry but can't since it is abstract
 class UserEntryRead(models.Model):
     entryId = models.IntegerField(primary_key=True)
-    
     def __str__(self) -> str:
         return str(self.entryId)

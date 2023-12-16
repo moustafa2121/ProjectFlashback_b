@@ -5,14 +5,14 @@ from .models import RedditDataEntry, KymDataEntry, TwitterDataEntry
 class RedditDataEntry_ser(serializers.ModelSerializer):
     class Meta:
         model = RedditDataEntry
-        fields = '__all__'
+        exclude = ('year', 'scoreValue','dataset',)
         
 class KymDataEntry_ser(serializers.ModelSerializer):
     class Meta:
         model = KymDataEntry
-        fields = '__all__'
+        exclude = ('year', 'scoreValue','dataset',)
         
 class TwitterDataEntry_ser(serializers.ModelSerializer):
     class Meta:
         model = TwitterDataEntry
-        fields = '__all__'
+        exclude = ('year', 'scoreValue','dataset',)
