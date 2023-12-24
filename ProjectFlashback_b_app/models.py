@@ -4,19 +4,21 @@ entryTypeChoices = [
     ("RE", "Reddit"),
     ("NW", "News"),
     ("ME", "Meme"),
+    ("WK", "Wikipedia"),
     ("MV", "Movie"),
     ("TV", "TV Show"),
     ("SO", "Song"),
     ("GA", "Game"),
-    ("AN", "Anime"),
 ]
-  
 
 #the dataset that BasicDataEntry belongs to.
 class Dataset(models.Model):
     #this field must match the dataset numbering in the 'Kaggel datasets.xlsb'
     datasetID = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
+    
+    def __str__(self) -> str:
+        return str(self.datasetID) + " " + self.name
 
 class BasicDataEntry(models.Model):
     entryId = models.AutoField(primary_key=True, editable=False)
@@ -29,7 +31,7 @@ class BasicDataEntry(models.Model):
     #1991 but the date is whenever were created on KYM such as 2008)
     year = models.IntegerField()
     #link to the entry
-    url = models.URLField(unique=True)
+    url = models.URLField(unique=False)
     #todo: what if the string is longer?
     title = models.CharField(max_length=250)
     entryType = models.CharField(max_length=2, choices=entryTypeChoices)
@@ -61,7 +63,33 @@ class TwitterDataEntry(BasicDataEntry):
     class Meta:
         db_table = "TwitterDataEntry"
         
-
+class WikipediaDataEntry(BasicDataEntry):
+    summary = models.CharField(max_length=1000)
+    img = models.URLField()
+    class Meta:
+        db_table = "WikipediaDataEntry"
+#movies, shows, games have the same entry, however,
+#we will use different models for each as it is easier when selecting for proprtions
+#todo: imdb not imbdb
+class ImbdbDataEntry(BasicDataEntry):
+    summary = models.CharField(max_length=1000)
+    img = models.URLField()
+    class Meta:
+        abstract = True
+        db_table = "ImbdbDataEntry"
+class ImbdbGameDataEntry(ImbdbDataEntry):
+    class Meta:
+        db_table = "ImbdbGameDataEntry"
+class ImbdbShowDataEntry(ImbdbDataEntry):
+    class Meta:
+        db_table = "ImbdbShowDataEntry"
+class ImbdbMovieDataEntry(ImbdbDataEntry):
+    class Meta:
+        db_table = "ImbdbMovieDataEntry"
+class SpotifyDataEntry(BasicDataEntry):
+    class Meta:
+        db_table = "SpotifyDataEntry"
+        
 #identified by a cookie. its main purpose is to keep track what the user has been
 #fetched so far to avoid duplicated
 class CookieUser(models.Model):
