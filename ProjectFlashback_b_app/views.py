@@ -53,7 +53,7 @@ def phase1View(request, year, batch):
     testingMode = False#ignores the cookies sent from the frontend
     randomize = True#sample random entries form each type
     shuffle = True#shuffle entry
-    ignoreHistory = True#ignoring history means user will get the same posts each time they refresh
+    ignoreHistory = False#ignoring history means user will get the same posts each time they refresh
 
     #handle cookies/user
     setCookie = False
