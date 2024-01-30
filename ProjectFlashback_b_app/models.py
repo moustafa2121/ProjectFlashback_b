@@ -20,6 +20,8 @@ class Dataset(models.Model):
     def __str__(self) -> str:
         return str(self.datasetID) + " " + self.name
 
+#A data entry is a single post/card-like entry
+#example: a reddit post, a song, a movie
 class BasicDataEntry(models.Model):
     entryId = models.AutoField(primary_key=True, editable=False)
     dataset = models.ForeignKey(Dataset, on_delete=models.SET_NULL, 
@@ -44,9 +46,7 @@ class BasicDataEntry(models.Model):
     def __str__(self) -> str:
         return self.entryType + " " + self.title[:50]
 
-#count entries count per year            
-#[print(str(i)+' : '+ str(md.RedditDataEntry.objects.filter(year=i).count())) for i in range(1990, 2025, 1)]
-
+#sub classes of BasicDataEntry
 class RedditDataEntry(BasicDataEntry):
     img = models.URLField()
     class Meta:
@@ -70,20 +70,19 @@ class WikipediaDataEntry(BasicDataEntry):
         db_table = "WikipediaDataEntry"
 #movies, shows, games have the same entry, however,
 #we will use different models for each as it is easier when selecting for proprtions
-#todo: imdb not imbdb
-class ImbdbDataEntry(BasicDataEntry):
+class ImdbDataEntry(BasicDataEntry):
     summary = models.CharField(max_length=1000)
     img = models.URLField()
     class Meta:
         abstract = True
         db_table = "ImbdbDataEntry"
-class ImbdbGameDataEntry(ImbdbDataEntry):
+class ImdbGameDataEntry(ImdbDataEntry):
     class Meta:
         db_table = "ImbdbGameDataEntry"
-class ImbdbShowDataEntry(ImbdbDataEntry):
+class ImdbShowDataEntry(ImdbDataEntry):
     class Meta:
         db_table = "ImbdbShowDataEntry"
-class ImbdbMovieDataEntry(ImbdbDataEntry):
+class ImdbMovieDataEntry(ImdbDataEntry):
     class Meta:
         db_table = "ImbdbMovieDataEntry"
 class SpotifyDataEntry(BasicDataEntry):
@@ -91,7 +90,7 @@ class SpotifyDataEntry(BasicDataEntry):
         db_table = "SpotifyDataEntry"
         
 #identified by a cookie. its main purpose is to keep track what the user has been
-#fetched so far to avoid duplicated
+#fetched so far to avoid duplicats
 class CookieUser(models.Model):
     cookie = models.CharField(primary_key=True, max_length=200)
     entriesRead = models.ManyToManyField('UserEntryRead')

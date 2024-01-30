@@ -2,10 +2,11 @@ from rest_framework.decorators import api_view, permission_classes
 import uuid, random
 from django.utils import timezone
 from rest_framework.exceptions import status
-from .models import CookieUser, RedditDataEntry, KymDataEntry, TwitterDataEntry, UserEntryRead, ImbdbGameDataEntry, WikipediaDataEntry, ImbdbDataEntry, ImbdbShowDataEntry, ImbdbMovieDataEntry, SpotifyDataEntry
+from .models import CookieUser, RedditDataEntry, KymDataEntry, TwitterDataEntry, UserEntryRead, ImdbGameDataEntry, WikipediaDataEntry, ImdbDataEntry, ImdbShowDataEntry, ImdbMovieDataEntry, SpotifyDataEntry
 from .serializer import RedditDataEntry_ser, TwitterDataEntry_ser, KymDataEntry_ser, ImbdbGameDataEntry_ser, WikipediaDataEntry_ser, ImbdbShowDataEntry_ser, ImbdbMovieDataEntry_ser, SpotifyDataEntry_ser
 from rest_framework.response import Response
 
+#holds an entry type. used for processing before sending data to the frontend
 class EntryWrapper:
     def __init__(self, entryType, sizePerBatch, serializer):
         self.entryType = entryType
@@ -16,11 +17,12 @@ class EntryWrapper:
     #just getting the top results each time
     def getData(self, excludedList, year, fetchCount=20):
         sortType = '-scoreValue'
-        if self.entryType == WikipediaDataEntry or issubclass(self.entryType, ImbdbDataEntry):
+        if self.entryType == WikipediaDataEntry or issubclass(self.entryType, ImdbDataEntry):
             sortType = 'scoreValue'
         self.storeData = self.entryType.objects.exclude(entryId__in=excludedList).filter(year=year).order_by(sortType)[:fetchCount]
         return len(self.storeData) != 0
     
+    #given a fetched list, randomize what ti fetch and then slice it based on its expected returned length
     def sliceAndRandomize(self, randomize=True):
         finalLst = list(self.serializer(self.storeData, many=True).data)
         if not randomize:
@@ -33,14 +35,16 @@ entriesWrapper = [EntryWrapper(RedditDataEntry, 2, RedditDataEntry_ser),
                   EntryWrapper(TwitterDataEntry, 2, TwitterDataEntry_ser),
                   EntryWrapper(KymDataEntry, 1, KymDataEntry_ser),
                   EntryWrapper(WikipediaDataEntry, 2, WikipediaDataEntry_ser),
-                  EntryWrapper(ImbdbGameDataEntry, 1, ImbdbGameDataEntry_ser),
-                  EntryWrapper(ImbdbMovieDataEntry, 1, WikipediaDataEntry_ser),
-                  EntryWrapper(ImbdbShowDataEntry, 1, ImbdbShowDataEntry_ser),
+                  EntryWrapper(ImdbGameDataEntry, 1, ImbdbGameDataEntry_ser),
+                  EntryWrapper(ImdbMovieDataEntry, 1, WikipediaDataEntry_ser),
+                  EntryWrapper(ImdbShowDataEntry, 1, ImbdbShowDataEntry_ser),
                   EntryWrapper(SpotifyDataEntry, 1, SpotifyDataEntry_ser),]
 
+#the primary view that fetches all data for requesting users
 #@permission_classes([AllowAny])
 @api_view(['GET'])
 def phase1View(request, year, batch):
+    #get the requested year
     year = int(year)
     if year > 2023 or year < 2000:
         return Response({"Failure": "Error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -77,6 +81,11 @@ def phase1View(request, year, batch):
 
 
 #handles retrieving the correct feed for the user
+#it will consider the year, the batch (as in each fetch.batch is 15 entries to be returned)
+#it will fetch entries based on the specified proportions by the entriesWrapper (i.e.
+#2 entries for reddit, 1 for imdb games, etc..)
+#it will randomize the entries fetched, unify them in a list, shuffle them
+#it will consider the history of the user so not to keep sending the same entries
 def sauce(cookieUser, year, batch, entriesWrapper=entriesWrapper, 
           randomize=True, shuffle=True, ignoreHistory=False):
     #1- get the exclusion list of the user

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import RedditDataEntry, KymDataEntry, TwitterDataEntry, ImbdbGameDataEntry, WikipediaDataEntry, ImbdbShowDataEntry, ImbdbMovieDataEntry, SpotifyDataEntry
+from .models import RedditDataEntry, KymDataEntry, TwitterDataEntry, ImdbGameDataEntry, WikipediaDataEntry, ImdbShowDataEntry, ImdbMovieDataEntry, SpotifyDataEntry
 
         
 class RedditDataEntry_ser(serializers.ModelSerializer):
@@ -24,15 +24,15 @@ class WikipediaDataEntry_ser(serializers.ModelSerializer):
         
 class ImbdbGameDataEntry_ser(serializers.ModelSerializer):
     class Meta:
-        model = ImbdbGameDataEntry
+        model = ImdbGameDataEntry
         exclude = ('year', 'scoreValue','dataset',)
 class ImbdbShowDataEntry_ser(serializers.ModelSerializer):
     class Meta:
-        model = ImbdbShowDataEntry
+        model = ImdbShowDataEntry
         exclude = ('year', 'scoreValue','dataset',)
 class ImbdbMovieDataEntry_ser(serializers.ModelSerializer):
     class Meta:
-        model = ImbdbMovieDataEntry
+        model = ImdbMovieDataEntry
         exclude = ('year', 'scoreValue','dataset',)
 class SpotifyDataEntry_ser(serializers.ModelSerializer):
     class Meta:
